@@ -5,9 +5,11 @@ import AuthLayout from "@/layouts/auth";
 import MainLayout from "@/layouts/main";
 import AdminSignInPage from "@/pages/auth/sign-in";
 import HomePage from "@/pages/home";
-import ProductsPage from "@/pages/dashboard/products";
-import CategoriesPage from "@/pages/dashboard/categories";
-import HomePage2 from "@/pages/home2";
+import AdminProductsPage from "@/pages/dashboard/products";
+import AdminCategoriesPage from "@/pages/dashboard/categories";
+import CategoriesPage from "@/pages/categories";
+import AboutPage from "@/pages/about";
+import ContactPage from "@/pages/contact";
 
 export const router = createBrowserRouter([
   {
@@ -19,8 +21,16 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "home2",
-        element: <HomePage2 />,
+        path: "categories",
+        element: <CategoriesPage />,
+      },
+      {
+        path: "about",
+        element: <AboutPage />,
+      },
+      {
+        path: "contact",
+        element: <ContactPage />,
       },
     ],
   },
@@ -44,11 +54,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "products",
-        element: <ProductsPage />,
+        element: <AdminProductsPage />,
       },
       {
         path: "categories",
-        element: <CategoriesPage />,
+        element: <AdminCategoriesPage />,
       },
     ],
   },
