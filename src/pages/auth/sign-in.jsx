@@ -10,7 +10,7 @@ export default function AdminSignInPage() {
           className="mx-auto h-28 w-auto"
         />
         <h2 className="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Sign in to your account
+          Admin Login
         </h2>
       </div>
 
