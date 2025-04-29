@@ -2,7 +2,15 @@ import { Link } from "react-router";
 
 export default function Hero() {
   return (
-    <div className="relative isolate px-6 pt-14 lg:px-8">
+    <div
+      className="relative isolate px-6 pt-14 lg:px-8"
+      style={{
+        backgroundImage: "url('/hero.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

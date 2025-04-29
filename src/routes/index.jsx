@@ -10,6 +10,7 @@ import AdminCategoriesPage from "@/pages/dashboard/categories";
 import CategoriesPage from "@/pages/categories";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
+import ProductDetails from "@/pages/productdetails";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: "categories",
         element: <CategoriesPage />,
+      },
+      {
+        path: "products/:id",
+        element: <ProductDetails />,
       },
       {
         path: "about",
@@ -56,6 +61,7 @@ export const router = createBrowserRouter([
         path: "products",
         element: <AdminProductsPage />,
       },
+
       {
         path: "categories",
         element: <AdminCategoriesPage />,
