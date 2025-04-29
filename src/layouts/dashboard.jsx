@@ -13,7 +13,6 @@ import {
 import {
   Bars3Icon,
   BellIcon,
-  Cog6ToothIcon,
   HomeIcon,
   XMarkIcon,
   TagIcon,
@@ -23,6 +22,7 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -42,10 +42,6 @@ const userNavigation = [
   { name: "Your profile", href: "#" },
   { name: "Sign out", href: "#" },
 ];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -97,23 +93,30 @@ const DashboardLayout = () => {
                         <li key={item.name}>
                           <NavLink
                             to={item.href}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-50 text-indigo-600"
-                                : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                              "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                            )}
+                            end={item.href === "/dashboard"}
+                            className={({ isActive }) =>
+                              cn(
+                                isActive
+                                  ? "bg-gray-50 text-indigo-600"
+                                  : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                              )
+                            }
                           >
-                            <item.icon
-                              aria-hidden="true"
-                              className={classNames(
-                                item.current
-                                  ? "text-indigo-600"
-                                  : "text-gray-400 group-hover:text-indigo-600",
-                                "size-6 shrink-0"
-                              )}
-                            />
-                            {item.name}
+                            {({ isActive }) => (
+                              <>
+                                <item.icon
+                                  aria-hidden="true"
+                                  className={cn(
+                                    isActive
+                                      ? "text-indigo-600"
+                                      : "text-gray-400 group-hover:text-indigo-600",
+                                    "size-6 shrink-0"
+                                  )}
+                                />
+                                {item.name}
+                              </>
+                            )}
                           </NavLink>
                         </li>
                       ))}
@@ -145,23 +148,30 @@ const DashboardLayout = () => {
                     <li key={item.name}>
                       <NavLink
                         to={item.href}
-                        className={classNames(
-                          item.current
-                            ? "bg-gray-50 text-indigo-600"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                          "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                        )}
+                        end={item.href === "/dashboard"}
+                        className={({ isActive }) =>
+                          cn(
+                            isActive
+                              ? "bg-gray-50 text-indigo-600"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                          )
+                        }
                       >
-                        <item.icon
-                          aria-hidden="true"
-                          className={classNames(
-                            item.current
-                              ? "text-indigo-600"
-                              : "text-gray-400 group-hover:text-indigo-600",
-                            "size-6 shrink-0"
-                          )}
-                        />
-                        {item.name}
+                        {({ isActive }) => (
+                          <>
+                            <item.icon
+                              aria-hidden="true"
+                              className={cn(
+                                isActive
+                                  ? "text-indigo-600"
+                                  : "text-gray-400 group-hover:text-indigo-600",
+                                "size-6 shrink-0"
+                              )}
+                            />
+                            {item.name}
+                          </>
+                        )}
                       </NavLink>
                     </li>
                   ))}
