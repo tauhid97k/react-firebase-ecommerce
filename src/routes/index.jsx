@@ -5,6 +5,8 @@ import AuthLayout from "@/layouts/auth";
 import MainLayout from "@/layouts/main";
 import AdminSignInPage from "@/pages/auth/sign-in";
 import HomePage from "@/pages/home";
+import ProductsPage from "@/pages/dashboard/products";
+import CategoriesPage from "@/pages/dashboard/categories";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +36,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <OverviewPage />,
+      },
+      {
+        path: "products",
+        element: <ProductsPage />,
+      },
+      {
+        path: "categories",
+        element: <CategoriesPage />,
       },
     ],
   },
