@@ -7,6 +7,7 @@ import AdminSignInPage from "@/pages/auth/sign-in";
 import HomePage from "@/pages/home";
 import ProductsPage from "@/pages/dashboard/products";
 import CategoriesPage from "@/pages/dashboard/categories";
+import HomePage2 from "@/pages/home2";
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "home2",
+        element: <HomePage2 />,
       },
     ],
   },

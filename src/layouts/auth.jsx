@@ -2,7 +2,7 @@ import { Outlet } from "react-router";
 
 const AuthLayout = () => {
   return (
-    <div className="h-screen grid place-items-center">
+    <div className="h-screen">
       <Outlet />
     </div>
   );

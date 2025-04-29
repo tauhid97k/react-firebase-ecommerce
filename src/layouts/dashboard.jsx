@@ -13,7 +13,6 @@ import {
 import {
   Bars3Icon,
   BellIcon,
-  Cog6ToothIcon,
   HomeIcon,
   XMarkIcon,
   TagIcon,
@@ -23,6 +22,7 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -42,10 +42,6 @@ const userNavigation = [
   { name: "Your profile", href: "#" },
   { name: "Sign out", href: "#" },
 ];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -84,9 +80,9 @@ const DashboardLayout = () => {
             <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
               <div className="flex h-16 shrink-0 items-center">
                 <img
-                  alt="Your Company"
-                  src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-                  className="h-8 w-auto"
+                  alt="Brand logo"
+                  src="/logoall.png"
+                  className="h-10 w-auto"
                 />
               </div>
               <nav className="flex flex-1 flex-col">
@@ -97,23 +93,30 @@ const DashboardLayout = () => {
                         <li key={item.name}>
                           <NavLink
                             to={item.href}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-50 text-indigo-600"
-                                : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                              "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                            )}
+                            end={item.href === "/dashboard"}
+                            className={({ isActive }) =>
+                              cn(
+                                isActive
+                                  ? "bg-gray-50 text-indigo-600"
+                                  : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                              )
+                            }
                           >
-                            <item.icon
-                              aria-hidden="true"
-                              className={classNames(
-                                item.current
-                                  ? "text-indigo-600"
-                                  : "text-gray-400 group-hover:text-indigo-600",
-                                "size-6 shrink-0"
-                              )}
-                            />
-                            {item.name}
+                            {({ isActive }) => (
+                              <>
+                                <item.icon
+                                  aria-hidden="true"
+                                  className={cn(
+                                    isActive
+                                      ? "text-indigo-600"
+                                      : "text-gray-400 group-hover:text-indigo-600",
+                                    "size-6 shrink-0"
+                                  )}
+                                />
+                                {item.name}
+                              </>
+                            )}
                           </NavLink>
                         </li>
                       ))}
@@ -131,11 +134,7 @@ const DashboardLayout = () => {
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
-            <img
-              alt="Your Company"
-              src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-              className="h-8 w-auto"
-            />
+            <img alt="Brand logo" src="/logoall.png" className="h-10 w-auto" />
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -145,23 +144,30 @@ const DashboardLayout = () => {
                     <li key={item.name}>
                       <NavLink
                         to={item.href}
-                        className={classNames(
-                          item.current
-                            ? "bg-gray-50 text-indigo-600"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                          "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                        )}
+                        end={item.href === "/dashboard"}
+                        className={({ isActive }) =>
+                          cn(
+                            isActive
+                              ? "bg-gray-50 text-indigo-600"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                          )
+                        }
                       >
-                        <item.icon
-                          aria-hidden="true"
-                          className={classNames(
-                            item.current
-                              ? "text-indigo-600"
-                              : "text-gray-400 group-hover:text-indigo-600",
-                            "size-6 shrink-0"
-                          )}
-                        />
-                        {item.name}
+                        {({ isActive }) => (
+                          <>
+                            <item.icon
+                              aria-hidden="true"
+                              className={cn(
+                                isActive
+                                  ? "text-indigo-600"
+                                  : "text-gray-400 group-hover:text-indigo-600",
+                                "size-6 shrink-0"
+                              )}
+                            />
+                            {item.name}
+                          </>
+                        )}
                       </NavLink>
                     </li>
                   ))}
