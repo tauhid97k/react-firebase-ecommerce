@@ -1,0 +1,332 @@
+[
+  {
+    "category_id": "1",
+    "category_title": "Honey",
+    "products": [
+      {
+        "id": 1,
+        "title": "Premium Wild Honey",
+        "description": "Collected from wild forests, 100% pure and organic.",
+        "quantity": 50,
+        "price": 450,
+        "image": ["honey1.jpg", "honey2.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Organic Farm Honey",
+        "description": "Sourced from organic farms, rich in nutrients.",
+        "quantity": 30,
+        "price": 400,
+        "image": ["honey3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Raw Unprocessed Honey",
+        "description": "Unfiltered, raw honey packed with antioxidants.",
+        "quantity": 40,
+        "price": 480,
+        "image": ["honey4.jpg", "honey5.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "2",
+    "category_title": "Ghee",
+    "products": [
+      {
+        "id": 1,
+        "title": "Desi Cow Ghee",
+        "description": "Pure desi cow ghee made by traditional methods.",
+        "quantity": 25,
+        "price": 850,
+        "image": ["ghee1.jpg", "ghee2.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Organic Ghee",
+        "description": "Organic ghee with a rich aroma and taste.",
+        "quantity": 20,
+        "price": 800,
+        "image": ["ghee3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Buffalo Milk Ghee",
+        "description": "Made from pure buffalo milk, high in fat content.",
+        "quantity": 18,
+        "price": 950,
+        "image": ["ghee4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "3",
+    "category_title": "Dates",
+    "products": [
+      {
+        "id": 1,
+        "title": "Ajwa Dates",
+        "description": "Premium Ajwa dates imported from Madina.",
+        "quantity": 100,
+        "price": 1200,
+        "image": ["dates1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Medjool Dates",
+        "description": "Large, soft, and naturally sweet dates.",
+        "quantity": 70,
+        "price": 1500,
+        "image": ["dates2.jpg", "dates3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Regular Dates Pack",
+        "description": "Affordable and healthy dates for daily consumption.",
+        "quantity": 200,
+        "price": 500,
+        "image": ["dates4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "4",
+    "category_title": "Mustard Oil",
+    "products": [
+      {
+        "id": 1,
+        "title": "Cold Pressed Mustard Oil",
+        "description": "Pure cold-pressed mustard oil, best for cooking.",
+        "quantity": 60,
+        "price": 300,
+        "image": ["mustard1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Organic Mustard Oil",
+        "description": "Naturally processed organic mustard oil.",
+        "quantity": 45,
+        "price": 350,
+        "image": ["mustard2.jpg", "mustard3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Premium Mustard Oil",
+        "description": "Best quality mustard oil with strong aroma.",
+        "quantity": 30,
+        "price": 370,
+        "image": ["mustard4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "5",
+    "category_title": "Molasses",
+    "products": [
+      {
+        "id": 1,
+        "title": "Sugarcane Molasses",
+        "description": "Thick and sweet molasses from fresh sugarcane.",
+        "quantity": 40,
+        "price": 250,
+        "image": ["molasses1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Organic Molasses",
+        "description": "Organic and natural sugarcane molasses.",
+        "quantity": 35,
+        "price": 300,
+        "image": ["molasses2.jpg", "molasses3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Traditional Molasses",
+        "description": "Made with traditional method for authentic taste.",
+        "quantity": 25,
+        "price": 280,
+        "image": ["molasses4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "6",
+    "category_title": "Masala",
+    "products": [
+      {
+        "id": 1,
+        "title": "Premium Mixed Masala",
+        "description": "Premium spice mix for all your recipes.",
+        "quantity": 50,
+        "price": 200,
+        "image": ["masala1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Special Garam Masala",
+        "description": "Special garam masala blend, freshly ground.",
+        "quantity": 45,
+        "price": 220,
+        "image": ["masala2.jpg", "masala3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Home Made Masala Pack",
+        "description": "Home style freshly prepared masala mixes.",
+        "quantity": 30,
+        "price": 180,
+        "image": ["masala4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "7",
+    "category_title": "ভাই ভাই মধু ঘর",
+    "products": [
+      {
+        "id": 1,
+        "title": "ভাই ভাই Forest Honey",
+        "description": "Collected from deep forest sources, unprocessed.",
+        "quantity": 60,
+        "price": 500,
+        "image": ["bhaibhai1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "ভাই ভাই Organic Honey",
+        "description": "Pure organic honey by ভাই ভাই মধু ঘর.",
+        "quantity": 40,
+        "price": 520,
+        "image": ["bhaibhai2.jpg", "bhaibhai3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "ভাই ভাই Raw Honey",
+        "description": "Unfiltered raw honey, rich in nutrients.",
+        "quantity": 55,
+        "price": 540,
+        "image": ["bhaibhai4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "8",
+    "category_title": "Seba Foods",
+    "products": [
+      {
+        "id": 1,
+        "title": "Seba Premium Ghee",
+        "description": "Premium quality ghee by Seba Foods.",
+        "quantity": 35,
+        "price": 900,
+        "image": ["seba1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Seba Farm Honey",
+        "description": "Natural farm honey packed by Seba.",
+        "quantity": 50,
+        "price": 470,
+        "image": ["seba2.jpg", "seba3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Seba Organic Dates",
+        "description": "Organic dates package by Seba Foods.",
+        "quantity": 40,
+        "price": 1100,
+        "image": ["seba4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "9",
+    "category_title": "Natural Foods",
+    "products": [
+      {
+        "id": 1,
+        "title": "Natural Honey",
+        "description": "100% Natural honey packed with love.",
+        "quantity": 65,
+        "price": 490,
+        "image": ["natural1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Natural Dates Pack",
+        "description": "Handpicked dates by Natural Foods.",
+        "quantity": 70,
+        "price": 1150,
+        "image": ["natural2.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Natural Mustard Oil",
+        "description": "Cold-pressed natural mustard oil.",
+        "quantity": 45,
+        "price": 330,
+        "image": ["natural3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  },
+  {
+    "category_id": "10",
+    "category_title": "সিরাজগন্জ সরিষা মিল",
+    "products": [
+      {
+        "id": 1,
+        "title": "Sirajganj Mustard Oil - Premium",
+        "description": "Top quality mustard oil from Sirajganj.",
+        "quantity": 50,
+        "price": 340,
+        "image": ["sirajganj1.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 2,
+        "title": "Sirajganj Special Mustard Oil",
+        "description": "Freshly milled mustard oil from Sirajganj mills.",
+        "quantity": 55,
+        "price": 360,
+        "image": ["sirajganj2.jpg", "sirajganj3.jpg"],
+        "whatsapp_number": "+8801616367606"
+      },
+      {
+        "id": 3,
+        "title": "Sirajganj Organic Mustard Oil",
+        "description": "Organic mustard oil crafted in Sirajganj.",
+        "quantity": 40,
+        "price": 370,
+        "image": ["sirajganj4.jpg"],
+        "whatsapp_number": "+8801616367606"
+      }
+    ]
+  }
+]
