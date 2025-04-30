@@ -75,6 +75,7 @@ const Navbar = () => {
                 className="h-10 w-auto"
               />
             </a>
+
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
@@ -96,14 +97,6 @@ const Navbar = () => {
                     {item.name}
                   </NavLink>
                 ))}
-              </div>
-              <div className="py-6">
-                <Link
-                  to="/admin"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                >
-                  Log in
-                </Link>
               </div>
             </div>
           </div>
