@@ -97,7 +97,7 @@ const DashboardLayout = () => {
                             className={({ isActive }) =>
                               cn(
                                 isActive
-                                  ? "bg-gray-50 text-indigo-600"
+                                  ? "bg-indigo-50 text-indigo-600"
                                   : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
                                 "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                               )
@@ -148,7 +148,7 @@ const DashboardLayout = () => {
                         className={({ isActive }) =>
                           cn(
                             isActive
-                              ? "bg-gray-50 text-indigo-600"
+                              ? "bg-indigo-50 text-indigo-600"
                               : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
                             "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                           )
