@@ -1,6 +1,47 @@
-import { Link } from "react-router";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 export default function AdminSignInPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  // Handle email/password sign in
+  const handleEmailSignIn = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+    } catch (error) {
+      console.error("Email sign-in error:", error);
+      setError(error.message || "Failed to sign in with email and password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Google sign in
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      setError(error.message || "Failed to sign in with Google");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -15,7 +56,7 @@ export default function AdminSignInPage() {
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST">
+        <form onSubmit={handleEmailSignIn}>
           <div className="mb-3">
             <label
               htmlFor="email"
@@ -30,6 +71,8 @@ export default function AdminSignInPage() {
                 type="email"
                 required
                 autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
@@ -51,17 +94,30 @@ export default function AdminSignInPage() {
                 type="password"
                 required
                 autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
           </div>
 
+          {error && (
+            <div className="mb-6 rounded-md bg-red-50 p-4">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              disabled={loading}
+              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-indigo-400 disabled:cursor-not-allowed"
             >
-              Sign in
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
 
@@ -81,9 +137,11 @@ export default function AdminSignInPage() {
             </div>
 
             <div className="mt-6">
-              <Link
-                to="#"
-                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:ring-transparent"
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:ring-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
                   <path
@@ -104,7 +162,7 @@ export default function AdminSignInPage() {
                   />
                 </svg>
                 <span className="text-sm/6 font-semibold">Google</span>
-              </Link>
+              </button>
             </div>
           </div>
         </form>

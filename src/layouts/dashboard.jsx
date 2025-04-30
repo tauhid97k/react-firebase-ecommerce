@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useNavigate } from "react-router";
 import { useState } from "react";
 import {
   Dialog,
@@ -23,6 +23,8 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { cn } from "@/lib/utils";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -39,12 +41,22 @@ const navigation = [
 ];
 
 const userNavigation = [
-  { name: "Your profile", href: "#" },
-  { name: "Sign out", href: "#" },
+  { name: "Your profile", href: "/dashboard/profile", type: "link" },
+  { name: "Sign out", type: "button" },
 ];
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <div>
@@ -249,12 +261,21 @@ const DashboardLayout = () => {
                 >
                   {userNavigation.map((item) => (
                     <MenuItem key={item.name}>
-                      <NavLink
-                        to={item.href}
-                        className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
-                      >
-                        {item.name}
-                      </NavLink>
+                      {item.type === "link" ? (
+                        <NavLink
+                          to={item.href}
+                          className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
+                        >
+                          {item.name}
+                        </NavLink>
+                      ) : (
+                        <button
+                          onClick={handleSignOut}
+                          className="block w-full text-left px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
+                        >
+                          {item.name}
+                        </button>
+                      )}
                     </MenuItem>
                   ))}
                 </MenuItems>
