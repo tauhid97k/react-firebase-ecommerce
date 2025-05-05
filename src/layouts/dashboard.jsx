@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -17,6 +17,7 @@ import {
   XMarkIcon,
   TagIcon,
   ShoppingBagIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
@@ -24,7 +25,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { ProfileModal } from "@/components/shared/profile-modal";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -41,13 +43,24 @@ const navigation = [
 ];
 
 const userNavigation = [
-  { name: "Your profile", href: "/dashboard/profile", type: "link" },
+  { name: "Your profile", type: "profile" },
   { name: "Sign out", type: "button" },
 ];
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
+  
+  // Monitor auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    
+    return () => unsubscribe();
+  }, []);
   
   const handleSignOut = async () => {
     try {
@@ -56,6 +69,10 @@ const DashboardLayout = () => {
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+  
+  const handleOpenProfileModal = () => {
+    setProfileModalOpen(true);
   };
 
   return (
@@ -237,17 +254,27 @@ const DashboardLayout = () => {
               <Menu as="div" className="relative">
                 <MenuButton className="-m-1.5 flex items-center p-1.5">
                   <span className="sr-only">Open user menu</span>
-                  <img
-                    alt=""
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    className="size-8 rounded-full bg-gray-50"
-                  />
+                  {currentUser && currentUser.photoURL ? (
+                    <img
+                      alt="User profile"
+                      src={currentUser.photoURL}
+                      className="size-8 rounded-full bg-gray-50 object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://ui-avatars.com/api/?name=" + (currentUser.displayName || "User") + "&background=0D8ABC&color=fff";
+                      }}
+                    />
+                  ) : (
+                    <div className="size-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <UserIcon className="size-5 text-indigo-600" />
+                    </div>
+                  )}
                   <span className="hidden lg:flex lg:items-center">
                     <span
                       aria-hidden="true"
                       className="ml-4 text-sm/6 font-semibold text-gray-900"
                     >
-                      Tom Cook
+                      {currentUser?.displayName || "User"}
                     </span>
                     <ChevronDownIcon
                       aria-hidden="true"
@@ -261,13 +288,13 @@ const DashboardLayout = () => {
                 >
                   {userNavigation.map((item) => (
                     <MenuItem key={item.name}>
-                      {item.type === "link" ? (
-                        <NavLink
-                          to={item.href}
-                          className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
+                      {item.type === "profile" ? (
+                        <button
+                          onClick={handleOpenProfileModal}
+                          className="block w-full text-left px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
                         >
                           {item.name}
-                        </NavLink>
+                        </button>
                       ) : (
                         <button
                           onClick={handleSignOut}
@@ -290,6 +317,13 @@ const DashboardLayout = () => {
           </div>
         </main>
       </div>
+      
+      {/* Profile Modal */}
+      <ProfileModal 
+        isOpen={profileModalOpen} 
+        onClose={() => setProfileModalOpen(false)} 
+        user={currentUser} 
+      />
     </div>
   );
 };

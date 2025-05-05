@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore/lite";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,4 +21,7 @@ const db = getFirestore(app);
 // Create Google provider instance
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, db, googleProvider };
+// Initialize Firebase Storage
+const storage = getStorage(app);
+
+export { auth, db, storage, googleProvider };

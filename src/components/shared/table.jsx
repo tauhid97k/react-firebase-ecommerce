@@ -4,10 +4,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export const DataTable = ({ columns, data }) => {
+export const DataTable = ({ columns, data = [], isLoading = false }) => {
   // Init table
   const table = useReactTable({
-    data: data.data || [],
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -17,10 +17,10 @@ export const DataTable = ({ columns, data }) => {
       <table className="w-full text-[15px]">
         <thead className="text-base tracking-wide text-zinc-700 dark:text-zinc-200">
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className="bg-slate-50">
               {headerGroup.headers.map((header) => (
                 <th
-                  className="h-12 px-6 text-left text-dark-200 align-middle font-medium [&:has([role=checkbox])]:pr-0 whitespace-nowrap bg-light-100 border-y border-slate-300 bg-slate-50"
+                  className="h-12 px-6 text-left text-slate-700 align-middle font-medium [&:has([role=checkbox])]:pr-0 whitespace-nowrap border-y border-slate-300"
                   key={header.id}
                 >
                   {header.isPlaceholder
@@ -35,12 +35,21 @@ export const DataTable = ({ columns, data }) => {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.length ? (
+          {isLoading ? (
+            <tr>
+              <td colSpan={columns.length} className="h-28 text-center text-lg">
+                <div className="flex justify-center items-center space-x-2">
+                  <div className="animate-spin rounded-full h-5 w-5"></div>
+                  <span>Loading...</span>
+                </div>
+              </td>
+            </tr>
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} className="border-b border-slate-300 last:border-b-0">
                 {row.getVisibleCells().map((cell) => (
                   <td
-                    className="px-6 py-4 align-middle [&:has([role=checkbox])]:pr-0 max-w-[230px] truncate border-b"
+                    className="px-6 py-4 align-middle [&:has([role=checkbox])]:pr-0 max-w-[230px] truncate"
                     key={cell.id}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -1,198 +1,236 @@
-import { useState } from "react";
-import {
-  Package,
-  FolderPlus,
-  Plus,
-  Clipboard,
-  ChevronDown,
-  Search,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore/lite";
+import { db } from "@/lib/firebase";
+import { ArrowUpDown, Package, ArrowDown, ArrowUp, Layers } from "lucide-react";
 
 export default function OverviewPage() {
-  // Sample data - in real app, this would come from an API
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Ghee", count: 3 },
-    { id: 2, name: "Spices", count: 5 },
-    { id: 3, name: "Rice", count: 2 },
-    { id: 4, name: "Flour", count: 4 },
-  ]);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Sorting states
+  const [priceSort, setPriceSort] = useState(null); // null, 'asc', 'desc'
+  const [stockSort, setStockSort] = useState(null); // null, 'asc', 'desc'
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Premium Cow Ghee",
-      category: "Ghee",
-      stock: 25,
-      price: 499,
-    },
-    {
-      id: 2,
-      name: "Organic Buffalo Ghee",
-      category: "Ghee",
-      stock: 15,
-      price: 599,
-    },
-    { id: 3, name: "A2 Desi Ghee", category: "Ghee", stock: 20, price: 699 },
-    {
-      id: 4,
-      name: "Red Chilli Powder",
-      category: "Spices",
-      stock: 50,
-      price: 99,
-    },
-    {
-      id: 5,
-      name: "Turmeric Powder",
-      category: "Spices",
-      stock: 45,
-      price: 79,
-    },
-  ]);
-
-  const [selectedCategory, setSelectedCategory] = useState("Ghee");
-  const filteredProducts = products.filter(
-    (product) => product.category === selectedCategory
-  );
-
-  // For dropdowns
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // Fetch categories and products
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch categories
+        const categoriesCollection = collection(db, "categories");
+        const categorySnapshot = await getDocs(categoriesCollection);
+        const categoryList = categorySnapshot.docs.map(doc => ({
+          id: doc.id,
+          title: doc.data().title,
+          images: doc.data().images || [],
+          productCount: 0 // Will be updated after fetching products
+        }));
+        
+        // Fetch products
+        const productsCollection = collection(db, "products");
+        const q = query(productsCollection, orderBy("createdAt", "desc"));
+        const productSnapshot = await getDocs(q);
+        const productList = productSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Count products per category
+        const categoriesWithCount = categoryList.map(category => {
+          const count = productList.filter(product => product.category_id === category.id).length;
+          return { ...category, productCount: count };
+        });
+        
+        setCategories(categoriesWithCount);
+        setProducts(productList);
+        
+        // Select first category by default if available
+        if (categoriesWithCount.length > 0 && !selectedCategory) {
+          setSelectedCategory(categoriesWithCount[0]);
+          setFilteredProducts(
+            productList.filter(product => product.category_id === categoriesWithCount[0].id)
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  // Update filtered products when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      let filtered = products.filter(product => product.category_id === selectedCategory.id);
+      
+      // Apply price sorting
+      if (priceSort === 'asc') {
+        filtered = [...filtered].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+      } else if (priceSort === 'desc') {
+        filtered = [...filtered].sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      }
+      
+      // Apply stock sorting
+      if (stockSort === 'asc') {
+        filtered = [...filtered].sort((a, b) => parseInt(a.quantity) - parseInt(b.quantity));
+      } else if (stockSort === 'desc') {
+        filtered = [...filtered].sort((a, b) => parseInt(b.quantity) - parseInt(a.quantity));
+      }
+      
+      setFilteredProducts(filtered);
+    }
+  }, [selectedCategory, products, priceSort, stockSort]);
+  
+  // Toggle price sorting
+  const togglePriceSort = () => {
+    if (priceSort === null) setPriceSort('desc');
+    else if (priceSort === 'desc') setPriceSort('asc');
+    else setPriceSort(null);
+    
+    // Reset stock sort when price sort changes
+    setStockSort(null);
+  };
+  
+  // Toggle stock sorting
+  const toggleStockSort = () => {
+    if (stockSort === null) setStockSort('desc');
+    else if (stockSort === 'desc') setStockSort('asc');
+    else setStockSort(null);
+    
+    // Reset price sort when stock sort changes
+    setPriceSort(null);
+  };
+  
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        {/* Page Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Products Dashboard
-            </h1>
-            <p className="text-sm text-gray-500">
-              Manage your products and categories
-            </p>
-          </div>
-          <div className="flex space-x-3">
-            <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-              <Plus size={18} className="mr-2" />
-              Add Product
-            </button>
-            <button className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              <FolderPlus size={18} className="mr-2" />
-              Add Category
-            </button>
-          </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-medium mb-6">Dashboard Overview</h1>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
-
-        {/* Category Selector */}
-        <div className="mb-6">
-          <div className="relative inline-block text-left">
-            <div>
-              <button
-                type="button"
-                className="inline-flex justify-between items-center w-56 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <span>Category: {selectedCategory}</span>
-                <ChevronDown size={16} className="ml-2" />
-              </button>
-            </div>
-
-            {isDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                <div className="py-1" role="menu" aria-orientation="vertical">
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => {
-                        setSelectedCategory(category.name);
-                        setIsDropdownOpen(false);
-                      }}
-                    >
-                      {category.name} ({category.count})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Product Cards based on selected category */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Products in "{selectedCategory}" Category
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">{product.category}</p>
+      ) : (
+        <>
+          {/* Categories Section */}
+          <div className="mb-8">
+            <h2 className="text-xl font-medium mb-4">Categories</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {categories.map((category) => (
+                <div 
+                  key={category.id} 
+                  className={`bg-white rounded-lg shadow-sm border p-4 cursor-pointer transition-all ${selectedCategory?.id === category.id ? 'ring-2 ring-indigo-500' : 'hover:shadow-md'}`}
+                  onClick={() => handleCategorySelect(category)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      {category.images && category.images.length > 0 ? (
+                        <img 
+                          src={category.images[0].url} 
+                          alt={category.title}
+                          className="h-14 w-14 rounded-lg object-cover"
+                          onError={(e) => {
+                            e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17a3f093956%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17a3f093956%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22108.5390625%22%20y%3D%2296.3%22%3EImage%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                          }}
+                        />
+                      ) : (
+                        <div className="h-14 w-14 rounded-lg bg-gray-200 flex items-center justify-center">
+                          <Package size={24} className="text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{category.title}</h3>
+                      <p className="text-sm text-gray-500">{category.productCount} Products</p>
+                    </div>
                   </div>
-                  <span className="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                    In Stock: {product.stock}
-                  </span>
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <p className="text-lg font-bold text-gray-900">
-                    ₹{product.price}
-                  </p>
-                  <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                    Edit Details
+              ))}
+            </div>
+          </div>
+          
+          {/* Products Section */}
+          {selectedCategory && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-medium">Products in {selectedCategory.title}</h2>
+                <div className="flex space-x-2">
+                  <button 
+                    className={`px-3 py-1.5 text-sm rounded-md flex items-center ${priceSort ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={togglePriceSort}
+                  >
+                    Price
+                    {priceSort === 'desc' && <ArrowDown size={16} className="ml-1" />}
+                    {priceSort === 'asc' && <ArrowUp size={16} className="ml-1" />}
+                    {priceSort === null && <ArrowUpDown size={16} className="ml-1" />}
+                  </button>
+                  <button 
+                    className={`px-3 py-1.5 text-sm rounded-md flex items-center ${stockSort ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={toggleStockSort}
+                  >
+                    Stock
+                    {stockSort === 'desc' && <ArrowDown size={16} className="ml-1" />}
+                    {stockSort === 'asc' && <ArrowUp size={16} className="ml-1" />}
+                    {stockSort === null && <Layers size={16} className="ml-1" />}
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Summary Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Category Summary
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className={`p-4 rounded-lg border ${
-                  selectedCategory === category.name
-                    ? "bg-indigo-50 border-indigo-200"
-                    : "bg-gray-50 border-gray-200"
-                }`}
-                onClick={() => setSelectedCategory(category.name)}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={`p-2 rounded-md ${
-                      selectedCategory === category.name
-                        ? "bg-indigo-100 text-indigo-600"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    <Package size={20} />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">
-                      {category.name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {category.count} Products
-                    </p>
-                  </div>
+              
+              {filteredProducts.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+                  <p className="text-gray-500">No products found in this category.</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredProducts.map((product) => (
+                    <div key={product.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                      <div className="relative h-48 bg-gray-200">
+                        {product.images && product.images.length > 0 ? (
+                          <img 
+                            src={product.images[0].url} 
+                            alt={product.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17a3f093956%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17a3f093956%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22108.5390625%22%20y%3D%2296.3%22%3EImage%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package size={48} className="text-gray-400" />
+                          </div>
+                        )}
+                        {product.quantity <= 5 && (
+                          <div className="absolute top-2 right-2 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+                            Low Stock: {product.quantity}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium text-gray-900 mb-1">{product.title}</h3>
+                        <p className="text-sm text-gray-500 mb-2 line-clamp-2">{product.description || 'No description available'}</p>
+                        <div className="flex justify-between items-center mt-4">
+                          <div className="text-lg font-bold text-gray-900">${parseFloat(product.price).toFixed(2)}</div>
+                          <div className="text-sm text-gray-500">Stock: {product.quantity}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
