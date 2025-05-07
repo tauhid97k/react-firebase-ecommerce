@@ -1,68 +1,21 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore/lite";
-import { db } from "@/lib/firebase";
+import { useLoaderData } from "react-router";
 import { ArrowUpDown, Package, ArrowDown, ArrowUp, Layers } from "lucide-react";
 
 export default function OverviewPage() {
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Get data from the loader
+  const loaderData = useLoaderData();
+  
+  // Initialize state with loader data
+  const [categories] = useState(loaderData?.categories || []);
+  const [products] = useState(loaderData?.products || []);
+  const [selectedCategory, setSelectedCategory] = useState(loaderData?.selectedCategory || null);
+  const [filteredProducts, setFilteredProducts] = useState(loaderData?.filteredProducts || []);
+  const [isLoading] = useState(false); // Only for display purposes
   
   // Sorting states
   const [priceSort, setPriceSort] = useState(null); // null, 'asc', 'desc'
   const [stockSort, setStockSort] = useState(null); // null, 'asc', 'desc'
-
-  // Fetch categories and products
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch categories
-        const categoriesCollection = collection(db, "categories");
-        const categorySnapshot = await getDocs(categoriesCollection);
-        const categoryList = categorySnapshot.docs.map(doc => ({
-          id: doc.id,
-          title: doc.data().title,
-          images: doc.data().images || [],
-          productCount: 0 // Will be updated after fetching products
-        }));
-        
-        // Fetch products
-        const productsCollection = collection(db, "products");
-        const q = query(productsCollection, orderBy("createdAt", "desc"));
-        const productSnapshot = await getDocs(q);
-        const productList = productSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        // Count products per category
-        const categoriesWithCount = categoryList.map(category => {
-          const count = productList.filter(product => product.category_id === category.id).length;
-          return { ...category, productCount: count };
-        });
-        
-        setCategories(categoriesWithCount);
-        setProducts(productList);
-        
-        // Select first category by default if available
-        if (categoriesWithCount.length > 0 && !selectedCategory) {
-          setSelectedCategory(categoriesWithCount[0]);
-          setFilteredProducts(
-            productList.filter(product => product.category_id === categoriesWithCount[0].id)
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
   
   // Update filtered products when category changes
   useEffect(() => {

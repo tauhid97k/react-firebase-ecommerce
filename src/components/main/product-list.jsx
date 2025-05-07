@@ -1,67 +1,12 @@
 import { Link } from "react-router";
-import { useState, useEffect } from "react";
-import { categoriesService, productsService } from "@/lib/firebase-services";
+import { useLoaderData } from "react-router";
 
 
 
 export default function ProductList() {
-  const [loading, setLoading] = useState(true);
-  const [categorizedProducts, setCategorizedProducts] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch all categories
-        const categories = await categoriesService.getAll();
-        // Sort categories by creation date (newest first)
-        const sortedCategories = [...categories].sort((a, b) => {
-          // Sort by createdAt timestamp if available
-          if (a.createdAt && b.createdAt) {
-            return b.createdAt.seconds - a.createdAt.seconds;
-          }
-          return 0; // Keep original order if no timestamps
-        });
-
-        // Fetch all products with category information
-        const allProducts = await productsService.getAllWithCategories();
-        
-        // Group products by category and sort each group by creation date (newest first)
-        const productsByCategory = [];
-        
-        for (const category of sortedCategories) {
-          // Filter products for this category
-          const categoryProducts = allProducts
-            .filter(product => product.category_id === category.id)
-            .sort((a, b) => {
-              // Sort by createdAt timestamp if available (newest first)
-              if (a.createdAt && b.createdAt) {
-                return b.createdAt.seconds - a.createdAt.seconds;
-              }
-              return 0;
-            })
-            // Limit to 4 products per category
-            .slice(0, 4);
-          
-          if (categoryProducts.length > 0) {
-            productsByCategory.push({
-              id: category.id,
-              title: category.title,
-              products: categoryProducts
-            });
-          }
-        }
-        
-        setCategorizedProducts(productsByCategory);
-      } catch (error) {
-        console.error("Error fetching products by categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  // Get data from the loader
+  const { categorizedProducts = [] } = useLoaderData() || {};
+  const loading = !categorizedProducts || categorizedProducts.length === 0;
 
   if (loading) {
     return (

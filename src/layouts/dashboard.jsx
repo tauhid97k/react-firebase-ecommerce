@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router";
+import TopLoader from "@/components/shared/top-loader";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -28,7 +29,7 @@ import { auth } from "@/lib/firebase";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { ProfileModal } from "@/components/shared/profile-modal";
 
-const navigation = [
+const navigationItems = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   {
     name: "Products",
@@ -77,6 +78,7 @@ const DashboardLayout = () => {
 
   return (
     <div>
+      <TopLoader />
       {/* Mobile Sidebar */}
       <Dialog
         open={sidebarOpen}
@@ -118,7 +120,7 @@ const DashboardLayout = () => {
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
                   <li>
                     <ul role="list" className="-mx-2 space-y-1">
-                      {navigation.map((item) => (
+                      {navigationItems.map((item) => (
                         <li key={item.name}>
                           <NavLink
                             to={item.href}
@@ -169,7 +171,7 @@ const DashboardLayout = () => {
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => (
+                  {navigationItems.map((item) => (
                     <li key={item.name}>
                       <NavLink
                         to={item.href}
@@ -313,7 +315,7 @@ const DashboardLayout = () => {
 
         <main className="py-10">
           <div className="px-4 sm:px-6 lg:px-8">
-            <Outlet />
+              <Outlet />
           </div>
         </main>
       </div>

@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 
 export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -13,9 +14,10 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
     price: "",
     whatsappNumber: "",
     category_id: "",
+    stock_warning_at: "5",
+    isVisible: true,
     images: []
   });
-  const [loading, setLoading] = useState(false);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -28,11 +30,6 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
           ...doc.data()
         }));
         setCategories(categoryList);
-        
-        // Set default category if available
-        if (categoryList.length > 0 && !formData.category_id) {
-          setFormData(prev => ({ ...prev, category_id: categoryList[0].id }));
-        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -41,13 +38,11 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
     if (isOpen) {
       fetchCategories();
     }
-  }, [isOpen, formData.category_id]);
+  }, [isOpen]);
 
   // Reset form data when modal opens or product changes
   useEffect(() => {
-    console.log("Modal opened or product changed:", { isOpen, product });
-    
-    // Always reset the form when the modal opens
+    // Only reset the form when the modal opens or when editing a different product
     if (isOpen) {
       if (product) {
         // If editing, populate with product data
@@ -58,9 +53,10 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
           price: product.price || "",
           whatsappNumber: product.whatsappNumber || "",
           category_id: product.category_id || "",
+          stock_warning_at: product.stock_warning_at ? product.stock_warning_at.toString() : "5",
+          isVisible: product.isVisible !== undefined ? product.isVisible : true,
           images: product.images || []
         });
-        console.log("Form populated with product data");
       } else {
         // If adding new, reset to empty form
         setFormData({
@@ -70,30 +66,47 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
           price: "",
           whatsappNumber: "",
           category_id: categories.length > 0 ? categories[0].id : "",
+          stock_warning_at: "5",
+          isVisible: true,
           images: []
         });
-        console.log("Form reset to empty");
       }
     }
   }, [isOpen, product, categories]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Set loading state
     setLoading(true);
     
+    // Create a copy of form data with properly formatted values
+    const processedFormData = {
+      ...formData,
+      // Ensure numeric fields are properly formatted
+      quantity: formData.quantity.toString(),
+      price: formData.price.toString(),
+      stock_warning_at: formData.stock_warning_at.toString()
+    };
+    
+    console.log('Product modal submitting with data:', processedFormData);
+      
     try {
-      await onSubmit(formData);
+      // Pass the processed form data to the parent component's onSubmit
+      await onSubmit(processedFormData);
+      console.log('Product modal submission successful');
       onClose();
     } catch (error) {
       console.error("Error submitting product:", error);
+      alert(`Error updating product: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -105,9 +118,10 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
       onClose={onClose} 
       title={product ? "Edit Product" : "Add New Product"}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Product Images */}
-        <div>
+      <form onSubmit={handleSubmit}>
+        <fieldset disabled={loading} className="space-y-4 disabled:opacity-70">
+          {/* Product Images */}
+          <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Product Images
           </label>
@@ -188,6 +202,26 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
           />
         </div>
         
+        {/* Stock Warning Threshold */}
+        <div>
+          <label htmlFor="stock_warning_at" className="block text-sm font-medium text-gray-700">
+            Low Stock Warning Threshold
+          </label>
+          <input
+            type="number"
+            name="stock_warning_at"
+            id="stock_warning_at"
+            required
+            min="0"
+            value={formData.stock_warning_at}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Show warning when quantity falls below this number
+          </p>
+        </div>
+        
         {/* Product Price */}
         <div>
           <label htmlFor="price" className="block text-sm font-medium text-gray-700">
@@ -221,18 +255,38 @@ export const ProductModal = ({ isOpen, onClose, onSubmit, product = null }) => {
           />
         </div>
         
+        {/* Visibility Toggle */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            name="isVisible"
+            id="isVisible"
+            checked={formData.isVisible}
+            onChange={handleChange}
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          <label htmlFor="isVisible" className="ml-2 block text-sm font-medium text-gray-700">
+            Visible to customers
+          </label>
+          <p className="ml-4 text-xs text-gray-500">
+            When unchecked, this product will not be visible on the public site
+          </p>
+        </div>
+        </fieldset>
+        
         <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
           <button
             type="submit"
+            className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2 disabled:opacity-50"
             disabled={loading}
-            className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
           >
             {loading ? "Saving..." : "Save"}
           </button>
           <button
             type="button"
-            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0 disabled:opacity-50"
             onClick={onClose}
+            disabled={loading}
           >
             Cancel
           </button>

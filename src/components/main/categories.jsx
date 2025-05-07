@@ -1,30 +1,12 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
-import { categoriesService } from "@/lib/firebase-services";
+import { Link, useLoaderData } from "react-router";
 
 export default function Categories() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const categoriesData = await categoriesService.getAll();
-        // Limit to 5 categories for the homepage display
-        setCategories(categoriesData.slice(0, 5));
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-        setError("Failed to load categories");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  // Get the data from the loader
+  const { categories = [] } = useLoaderData() || {};
+  
+  // If categories are not available in loader data, show a placeholder
+  const loading = !categories || categories.length === 0;
+  const error = null;
 
   return (
     <div className="bg-white">

@@ -4,7 +4,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export const DataTable = ({ columns, data = [], isLoading = false }) => {
+export const DataTable = ({ columns, data = [] }) => {
   // Init table
   const table = useReactTable({
     data,
@@ -35,16 +35,7 @@ export const DataTable = ({ columns, data = [], isLoading = false }) => {
           ))}
         </thead>
         <tbody>
-          {isLoading ? (
-            <tr>
-              <td colSpan={columns.length} className="h-28 text-center text-lg">
-                <div className="flex justify-center items-center space-x-2">
-                  <div className="animate-spin rounded-full h-5 w-5"></div>
-                  <span>Loading...</span>
-                </div>
-              </td>
-            </tr>
-          ) : table.getRowModel().rows.length ? (
+          {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="border-b border-slate-300 last:border-b-0">
                 {row.getVisibleCells().map((cell) => (

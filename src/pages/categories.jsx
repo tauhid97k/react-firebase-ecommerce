@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { categoriesService, productsService } from "@/lib/firebase-services";
+import { useState, useMemo } from "react";
+import { Link, useLocation, useNavigate, useLoaderData } from "react-router";
 
 // Price filter options
 const priceFilters = [
@@ -19,57 +18,20 @@ const stockFilters = [
 export default function CategoriesPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // Get data from the loader
+  const { categories = [], products = [], selectedCategories: initialSelectedCategories = [] } = useLoaderData() || {};
   
   // Filter states
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(initialSelectedCategories);
   const [priceSort, setPriceSort] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
   
-  // Parse query parameters
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const categoryParam = searchParams.get('category');
-    
-    if (categoryParam) {
-      // Check if it's a comma-separated list of category IDs
-      if (categoryParam.includes(',')) {
-        setSelectedCategories(categoryParam.split(','));
-      } else {
-        setSelectedCategories([categoryParam]);
-      }
-    } else {
-      setSelectedCategories([]);
-    }
-  }, [location.search]);
+  // Check if data is available
+  const loading = !products || products.length === 0;
+  const error = null;
   
-  // Fetch categories and products
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch categories
-        const categoriesData = await categoriesService.getAll();
-        setCategories(categoriesData);
-        
-        // Fetch products with category information
-        const productsData = await productsService.getAllWithCategories();
-        setProducts(productsData);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load products. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
+  // We don't need the initial fetch effect anymore since data comes from the loader
   
   // Handle category selection
   const handleCategoryChange = (categoryId) => {

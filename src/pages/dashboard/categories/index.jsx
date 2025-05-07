@@ -1,130 +1,100 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
+import { useLoaderData, useNavigation, useRevalidator } from "react-router";
+import { Form, useSubmit, Outlet } from "react-router";
 import { DataTable } from "@/components/shared/table";
 import { CategoryModal } from "./category-modal";
 import { ConfirmationModal } from "@/components/shared/confirmation-modal";
 import { PlusIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore/lite";
-import { db } from "@/lib/firebase";
 
 const AdminCategoriesPage = () => {
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Get data from the loader
+  const loaderData = useLoaderData();
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  
+  // Track loading state based on navigation state
+  const isSubmitting = navigation.state === "loading" || navigation.state === "submitting";
+  
+  // Use the revalidator hook for proper revalidation
+  const revalidator = useRevalidator();
+  
+  // Get categories and products data directly from loader data
+  const categories = loaderData?.categories || [];
+  const products = loaderData?.products || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  // Fetch categories from Firestore
-  const fetchCategories = async () => {
-    setIsLoading(true);
-    try {
-      console.log("Fetching categories from Firestore...");
-      const categoriesCollection = collection(db, "categories");
-      
-      // Create a query with ordering by createdAt in descending order
-      const q = query(categoriesCollection, orderBy("createdAt", "desc"));
-      const categoriesSnapshot = await getDocs(q);
-      
-      // Map the documents to objects and add the document ID
-      const categoriesList = categoriesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      console.log("Categories in descending order:", 
-        categoriesList.map(c => ({ id: c.id, title: c.title, createdAt: c.createdAt }))
-      );
-      
-      setCategories(categoriesList);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
   // Filter categories based on search query
-  const filteredCategories = useMemo(() => {
-    return categories.filter(category => 
-      category.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [categories, searchQuery]);
+  const filteredCategories = categories.filter(category => 
+    category.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Handle category form submission (add/edit)
-  const handleCategorySubmit = (formData) => {
-    console.log("handleCategorySubmit called with data:", formData);
+  const handleCategorySubmit = async (formData) => {
+    console.log("Submitting category form with data:", formData);
     
-    // Create a simple category object with title, images, and timestamp
-    const simplifiedCategory = {
-      title: formData.title,
-      // Store just the image URLs as an array of objects
-      images: formData.images.map(img => ({
-        url: img.url
-      })),
-      // Add a timestamp for sorting
-      createdAt: Date.now()
-    };
+    // Create a FormData object to submit
+    const formDataToSubmit = new FormData();
     
-    console.log("Simplified category data:", simplifiedCategory);
+    // Add all form data to the FormData object
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === 'images') {
+        formDataToSubmit.append(key, JSON.stringify(value));
+      } else if (typeof value === 'boolean') {
+        // Handle boolean values properly
+        formDataToSubmit.append(key, value.toString());
+      } else if (value !== null && value !== undefined) {
+        // Convert all values to strings to avoid type issues
+        formDataToSubmit.append(key, String(value));
+      }
+    });
     
     try {
       if (selectedCategory) {
         // Update existing category
-        console.log("Updating existing category with ID:", selectedCategory.id);
-        const categoryRef = doc(db, "categories", selectedCategory.id);
-        updateDoc(categoryRef, simplifiedCategory)
-          .then(() => {
-            console.log("Category updated successfully");
-            setIsModalOpen(false);
-            fetchCategories();
-          })
-          .catch(error => {
-            console.error("Error updating category:", error);
-          });
+        formDataToSubmit.append('id', selectedCategory.id);
+        
+        await submit(formDataToSubmit, {
+          method: "post",
+          action: "/dashboard/categories/update"
+        });
       } else {
         // Add new category
-        console.log("Adding new category");
-        addDoc(collection(db, "categories"), simplifiedCategory)
-          .then(() => {
-            console.log("Category added successfully");
-            setIsModalOpen(false);
-            fetchCategories();
-          })
-          .catch(error => {
-            console.error("Error adding category:", error);
-          });
+        await submit(formDataToSubmit, {
+          method: "post",
+          action: "/dashboard/categories/add"
+        });
       }
+      
+      // Revalidate after successful submission
+      revalidator.revalidate();
+      
+      return true;
     } catch (error) {
-      console.error("Error in handleCategorySubmit:", error);
+      console.error("Error submitting category:", error);
+      return false;
     }
-    
-    // Return something to indicate success (even though we're handling async operations above)
-    return true;
   };
 
   // Handle category deletion
-  const handleDeleteCategory = async () => {
-    if (!categoryToDelete) return;
-    
-    try {
-      console.log("Deleting category:", categoryToDelete);
-      // Delete category document from Firestore
-      await deleteDoc(doc(db, "categories", categoryToDelete.id));
+  const handleDeleteCategory = () => {
+    if (categoryToDelete) {
+      const formData = new FormData();
+      formData.append('id', categoryToDelete.id);
       
-      // No need to release object URLs anymore since we're using base64 strings
-      // which are automatically garbage collected
+      submit(formData, {
+        method: "post",
+        action: "/dashboard/categories/delete"
+      });
       
-      // Refresh the categories list
-      await fetchCategories();
+      // Revalidate after submission
+      revalidator.revalidate();
+      
       setIsDeleteModalOpen(false);
       setCategoryToDelete(null);
-    } catch (error) {
-      console.error("Error deleting category:", error);
     }
   };
 
@@ -196,6 +166,32 @@ const AdminCategoriesPage = () => {
       accessorKey: "title",
     },
     {
+      header: "Total Products",
+      accessorKey: "id",
+      cell: info => {
+        const categoryId = info.row.original.id;
+        // Count products in this category
+        const productCount = products.filter(product => product.category_id === categoryId).length;
+        return (
+          <span className="font-medium">
+            {productCount}
+          </span>
+        );
+      }
+    },
+    {
+      header: "Visibility",
+      accessorKey: "isVisible",
+      cell: info => {
+        const isVisible = info.getValue();
+        return (
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isVisible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {isVisible ? 'Visible' : 'Hidden'}
+          </span>
+        );
+      }
+    },
+    {
       header: "Action",
       accessorKey: "id",
       cell: renderActions
@@ -212,7 +208,8 @@ const AdminCategoriesPage = () => {
             setSelectedCategory(null);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          disabled={isSubmitting}
+          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
           <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
           Add Category
@@ -233,7 +230,6 @@ const AdminCategoriesPage = () => {
         <DataTable 
           columns={columns} 
           data={filteredCategories} 
-          isLoading={isLoading}
         />
       </div>
 
@@ -259,6 +255,9 @@ const AdminCategoriesPage = () => {
         confirmButtonText="Delete"
         cancelButtonText="Cancel"
       />
+      
+      {/* This outlet is needed for the actions to work */}
+      <Outlet />
     </div>
   );
 };
