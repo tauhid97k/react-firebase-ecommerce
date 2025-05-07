@@ -1,60 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Tab,
   TabGroup,
   TabList,
   TabPanel,
   TabPanels,
 } from "@headlessui/react";
-import { StarIcon } from "@heroicons/react/20/solid";
-import { HeartIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { productsService, categoriesService } from "@/lib/firebase-services";
 import { PhoneIcon } from "@heroicons/react/24/solid";
 
 export default function ProductDetails() {
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        // Fetch product details
-        const productData = await productsService.getById(id);
-        
-        if (productData) {
-          setProduct(productData);
-          
-          // Fetch category details if product has a category_id
-          if (productData.category_id) {
-            const categoryData = await categoriesService.getById(productData.category_id);
-            setCategory(categoryData);
-          }
-        } else {
-          setError("Product not found");
-        }
-      } catch (err) {
-        console.error("Error fetching product details:", err);
-        setError("Failed to load product details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchProductDetails();
-    }
-  }, [id]);
+  // Use the loader data instead of fetching in useEffect
+  const { product, category } = useLoaderData();
 
   // Function to handle WhatsApp contact
   const handleContactForOrder = () => {
@@ -74,29 +32,6 @@ export default function ProductDetails() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-          <p className="text-center">Loading product details...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">Error</h2>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
   if (!product) {
     return (
       <div className="bg-white">

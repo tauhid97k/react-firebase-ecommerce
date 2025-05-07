@@ -21,6 +21,7 @@ import {
 import DashboardLayout from "@/layouts/dashboard";
 import AuthLayout from "@/layouts/auth";
 import MainLayout from "@/layouts/main";
+import FullScreenLoader from "@/components/shared/full-screen-loader";
 
 // Lazy loaded components
 const HomePage = lazy(() => import("@/pages/home"));
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
+    hydrateFallbackElement: <FullScreenLoader />,
     children: [
       {
         index: true,

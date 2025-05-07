@@ -10,6 +10,6 @@ const root = createRoot(document.getElementById("root"));
 // Render with fallback element only
 root.render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <RouterProvider router={router}  />
   </StrictMode>
 );
