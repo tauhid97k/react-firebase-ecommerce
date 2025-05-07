@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router";
 import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
-  Radio,
-  RadioGroup,
   Tab,
   TabGroup,
   TabList,
@@ -15,58 +14,99 @@ import {
 } from "@headlessui/react";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { HeartIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
-
-const product = {
-  name: "Zip Tote Basket",
-  price: "$140",
-  rating: 4,
-  images: [
-    {
-      id: 1,
-      name: "Angled view",
-      src: "https://tailwindui.com/plus-assets/img/ecommerce-images/product-page-03-product-01.jpg",
-      alt: "Angled front view with bag zipped and handles upright.",
-    },
-    // More images...
-  ],
-  colors: [
-    {
-      name: "Washed Black",
-      bgColor: "bg-gray-700",
-      selectedColor: "ring-gray-700",
-    },
-    { name: "White", bgColor: "bg-white", selectedColor: "ring-gray-400" },
-    {
-      name: "Washed Gray",
-      bgColor: "bg-gray-500",
-      selectedColor: "ring-gray-500",
-    },
-  ],
-  description: `
-    <p>The Zip Tote Basket is the perfect midpoint between shopping tote and comfy backpack. With convertible straps, you can hand carry, should sling, or backpack this convenient and spacious bag. The zip top and durable canvas construction keeps your goods protected for all-day use.</p>
-  `,
-  details: [
-    {
-      name: "Features",
-      items: [
-        "Multiple strap configurations",
-        "Spacious interior with top zip",
-        "Leather handle and tabs",
-        "Interior dividers",
-        "Stainless strap loops",
-        "Double stitched construction",
-        "Water-resistant",
-      ],
-    },
-    // More sections...
-  ],
-};
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+import { productsService, categoriesService } from "@/lib/firebase-services";
+import { PhoneIcon } from "@heroicons/react/24/solid";
 
 export default function ProductDetails() {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Fetch product details
+        const productData = await productsService.getById(id);
+        
+        if (productData) {
+          setProduct(productData);
+          
+          // Fetch category details if product has a category_id
+          if (productData.category_id) {
+            const categoryData = await categoriesService.getById(productData.category_id);
+            setCategory(categoryData);
+          }
+        } else {
+          setError("Product not found");
+        }
+      } catch (err) {
+        console.error("Error fetching product details:", err);
+        setError("Failed to load product details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProductDetails();
+    }
+  }, [id]);
+
+  // Function to handle WhatsApp contact
+  const handleContactForOrder = () => {
+    if (!product) return;
+    
+    if (product.whatsappNumber) {
+      // Format the WhatsApp number (remove any non-digit characters)
+      const formattedNumber = product.whatsappNumber.replace(/\D/g, '');
+      // Create message text
+      const message = `Hello, I'm interested in ordering the product: ${product.title}. Please provide more information.`;
+      // Create WhatsApp URL
+      const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
+      // Open WhatsApp in a new tab
+      window.open(whatsappUrl, '_blank');
+    } else {
+      alert("No WhatsApp number available for this product.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white">
+        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+          <p className="text-center">Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="bg-white">
+        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-red-600 mb-2">Error</h2>
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!product) {
+    return (
+      <div className="bg-white">
+        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+          <p className="text-center">Product not found</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
@@ -76,95 +116,115 @@ export default function ProductDetails() {
             {/* Image selector */}
             <div className="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
               <TabList className="grid grid-cols-4 gap-6">
-                {product.images.map((image) => (
-                  <Tab
-                    key={image.id}
-                    className="group relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium text-gray-900 uppercase hover:bg-gray-50 focus:ring-3 focus:ring-indigo-500/50 focus:ring-offset-4 focus:outline-hidden"
-                  >
-                    <span className="sr-only">{image.name}</span>
-                    <span className="absolute inset-0 overflow-hidden rounded-md">
-                      <img
-                        alt=""
-                        src={image.src}
-                        className="size-full object-cover"
+                {product && product.images && product.images.length > 0 ? (
+                  product.images.map((image, index) => (
+                    <Tab
+                      key={index}
+                      className="group relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium text-gray-900 uppercase hover:bg-gray-50 focus:ring-3 focus:ring-indigo-500/50 focus:ring-offset-4 focus:outline-hidden"
+                    >
+                      <span className="absolute inset-0 overflow-hidden rounded-md">
+                        <img
+                          alt={`Product image ${index + 1}`}
+                          src={image.url}
+                          className="size-full object-cover"
+                          onError={(e) => {
+                            // Fallback if image fails to load
+                            e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17a3f093956%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17a3f093956%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22108.5390625%22%20y%3D%2296.3%22%3EImage%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                            e.target.classList.add('error');
+                          }}
+                        />
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-transparent ring-offset-2 group-data-selected:ring-indigo-500"
                       />
-                    </span>
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-transparent ring-offset-2 group-data-selected:ring-indigo-500"
-                    />
-                  </Tab>
-                ))}
+                    </Tab>
+                  ))
+                ) : (
+                  <div className="col-span-4 h-24 flex items-center justify-center bg-gray-100 rounded-md">
+                    <p className="text-gray-500 text-sm">No images available</p>
+                  </div>
+                )}
               </TabList>
             </div>
 
             <TabPanels>
-              {product.images.map((image) => (
-                <TabPanel key={image.id}>
-                  <img
-                    alt={image.alt}
-                    src={image.src}
-                    className="aspect-square w-full object-cover sm:rounded-lg"
-                  />
+              {product && product.images && product.images.length > 0 ? (
+                product.images.map((image, index) => (
+                  <TabPanel key={index}>
+                    <img
+                      alt={`Product image ${index + 1}`}
+                      src={image.url}
+                      className="aspect-square w-full object-cover sm:rounded-lg"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_17a3f093956%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_17a3f093956%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22108.5390625%22%20y%3D%2296.3%22%3EImage%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                        e.target.classList.add('error');
+                      }}
+                    />
+                  </TabPanel>
+                ))
+              ) : (
+                <TabPanel>
+                  <div className="aspect-square w-full bg-gray-100 flex items-center justify-center sm:rounded-lg">
+                    <p className="text-gray-500">No image available</p>
+                  </div>
                 </TabPanel>
-              ))}
+              )}
             </TabPanels>
           </TabGroup>
 
           {/* Product info */}
           <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-              {product.name}
-            </h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                {product?.title}
+              </h1>
+              {category && (
+                <Link 
+                  to={`/categories?category=${category.id}`}
+                  className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800 hover:bg-indigo-200 cursor-pointer"
+                  title="Click to see all products in this category"
+                >
+                  {category.title}
+                </Link>
+              )}
+            </div>
 
             <div className="mt-3">
               <h2 className="sr-only">Product information</h2>
               <p className="text-3xl tracking-tight text-gray-900">
-                {product.price}
+                ${parseFloat(product?.price || 0).toFixed(2)}
               </p>
             </div>
 
-            {/* Reviews */}
-            <div className="mt-3">
-              <h3 className="sr-only">Reviews</h3>
-              <div className="flex items-center">
-                <div className="flex items-center">
-                  {[0, 1, 2, 3, 4].map((rating) => (
-                    <StarIcon
-                      key={rating}
-                      aria-hidden="true"
-                      className={classNames(
-                        product.rating > rating
-                          ? "text-indigo-500"
-                          : "text-gray-300",
-                        "size-5 shrink-0"
-                      )}
-                    />
-                  ))}
-                </div>
-                <p className="sr-only">{product.rating} out of 5 stars</p>
+            {/* Quantity */}
+            {product?.quantity && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-600">
+                  Available: <span className="font-medium">{product.quantity}</span> in stock
+                </p>
               </div>
-            </div>
+            )}
 
+            {/* Description */}
             <div className="mt-6">
-              <h3 className="sr-only">Description</h3>
-
-              <div
-                dangerouslySetInnerHTML={{ __html: product.description }}
-                className="space-y-6 text-base text-gray-700"
-              />
+              <h3 className="text-sm font-medium text-gray-900">Description</h3>
+              <div className="mt-2 space-y-6 text-base text-gray-700">
+                <p>{product?.description}</p>
+              </div>
             </div>
 
-            <form className="mt-6">
-              <div className="mt-10 flex">
-                <button
-                  type="submit"
-                  className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50 focus:outline-hidden sm:w-full"
-                >
-                  Buy Now
-                </button>
-              </div>
-            </form>
+            <div className="mt-10">
+              <button
+                type="button"
+                onClick={handleContactForOrder}
+                className="flex w-full items-center justify-center gap-x-2 rounded-md border border-transparent bg-green-600 px-8 py-3 text-base font-medium text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-50 focus:outline-hidden"
+              >
+                <PhoneIcon className="h-5 w-5" aria-hidden="true" />
+                Contact for Order
+              </button>
+            </div>
           </div>
         </div>
       </div>
