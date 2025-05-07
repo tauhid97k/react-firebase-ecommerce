@@ -27,7 +27,7 @@ export default function ProductList() {
               {category.title}
             </h2>
             <Link
-              to={`/category/${category.id}`}
+              to={`/categories/${category.id}`}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500 md:block"
             >
               See all {category.title}

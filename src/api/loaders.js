@@ -61,19 +61,26 @@ export const loadHomePageData = async () => {
 };
 
 // Categories page loader
-export const loadCategoriesPageData = async ({ request }) => {
+export const loadCategoriesPageData = async ({ request, categoryId }) => {
   try {
-    // Get the URL search params to check for category filter
-    const url = new URL(request.url);
-    const categoryParam = url.searchParams.get('category');
     let selectedCategories = [];
     
-    if (categoryParam) {
-      // Check if it's a comma-separated list of category IDs
-      if (categoryParam.includes(',')) {
-        selectedCategories = categoryParam.split(',');
-      } else {
-        selectedCategories = [categoryParam];
+    // If categoryId is provided directly (from route params), use it
+    if (categoryId) {
+      selectedCategories = [categoryId];
+    }
+    // Otherwise check URL search params
+    else if (request) {
+      const url = new URL(request.url);
+      const categoryParam = url.searchParams.get('category');
+      
+      if (categoryParam) {
+        // Check if it's a comma-separated list of category IDs
+        if (categoryParam.includes(',')) {
+          selectedCategories = categoryParam.split(',');
+        } else {
+          selectedCategories = [categoryParam];
+        }
       }
     }
     

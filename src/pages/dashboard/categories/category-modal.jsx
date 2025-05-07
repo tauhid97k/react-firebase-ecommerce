@@ -107,21 +107,23 @@ export const CategoryModal = ({ isOpen, onClose, onSubmit, category = null }) =>
 
         
         {/* Visibility Toggle */}
-        <div className="flex items-center mt-4">
+        <div className="flex gap-2">
           <input
             type="checkbox"
             name="isVisible"
             id="isVisible"
             checked={formData.isVisible}
             onChange={handleChange}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 mt-1 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
-          <label htmlFor="isVisible" className="ml-2 block text-sm font-medium text-gray-700">
-            Visible to customers
-          </label>
-          <p className="ml-4 text-xs text-gray-500">
+          <div>
+            <label htmlFor="isVisible" className="block text-sm font-medium text-gray-700">
+              Visible to customers
+            </label>
+            <p className="text-xs text-gray-500">
             When unchecked, this category will not be visible on the public site
-          </p>
+            </p>
+          </div>
         </div>
         </fieldset>
         

@@ -15,7 +15,7 @@ export default function Categories() {
           <h2 className="text-2xl font-bold text-gray-900">Shop by Category</h2>
           <Link
             to="/categories"
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 sm:block"
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
           >
             Browse all categories
             <span aria-hidden="true"> &rarr;</span>
@@ -38,7 +38,7 @@ export default function Categories() {
                   {categories.map((category) => (
                     <Link
                       key={category.id}
-                      to={`/categories?category=${category.id}`}
+                      to={`/categories/${category.id}`}
                       className="relative flex h-80 w-56 flex-col overflow-hidden rounded-lg p-6 hover:opacity-75 xl:w-auto"
                     >
                       <span aria-hidden="true" className="absolute inset-0">

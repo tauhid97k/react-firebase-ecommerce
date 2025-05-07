@@ -53,6 +53,11 @@ export const router = createBrowserRouter([
         loader: loadCategoriesPageData,
       },
       {
+        path: "categories/:id",
+        element: <CategoriesPage />,
+        loader: ({ params }) => loadCategoriesPageData({ categoryId: params.id }),
+      },
+      {
         path: "products/:id",
         element: <ProductDetails />,
         loader: ({ params }) => loadProductDetails({ params }),
