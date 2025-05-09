@@ -1,4 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router";
+import Collapsible from "@/components/shared/Collapsible";
+import { AiFillHome, AiOutlineInfoCircle, AiOutlineMail, AiOutlineCopyright } from "react-icons/ai";
 import TopLoader from "@/components/shared/top-loader";
 import { useState, useEffect } from "react";
 import {
@@ -19,6 +21,7 @@ import {
   TagIcon,
   ShoppingBagIcon,
   UserIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
@@ -40,6 +43,17 @@ const navigationItems = [
     name: "Categories",
     href: "/dashboard/categories",
     icon: TagIcon,
+  },
+  {
+    name: "Website",
+    icon: GlobeAltIcon,
+    collapsible: true,
+    children: [
+      { name: "Homepage", href: "/dashboard/website/home" },
+      { name: "About Page", href: "/dashboard/website/about" },
+      { name: "Contact Page", href: "/dashboard/website/contact" },
+      { name: "Footer", href: "/dashboard/website/footer" },
+    ],
   },
 ];
 
@@ -117,38 +131,65 @@ const DashboardLayout = () => {
                 />
               </div>
               <nav className="flex flex-1 flex-col">
-                <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                <ul role="list" className="flex flex-1 flex-col gap-y-1">
                   <li>
                     <ul role="list" className="-mx-2 space-y-1">
                       {navigationItems.map((item) => (
                         <li key={item.name}>
-                          <NavLink
-                            to={item.href}
-                            end={item.href === "/dashboard"}
-                            className={({ isActive }) =>
-                              cn(
-                                isActive
-                                  ? "bg-indigo-50 text-indigo-600"
-                                  : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                              )
-                            }
-                          >
-                            {({ isActive }) => (
-                              <>
-                                <item.icon
-                                  aria-hidden="true"
-                                  className={cn(
-                                    isActive
-                                      ? "text-indigo-600"
-                                      : "text-gray-400 group-hover:text-indigo-600",
-                                    "size-6 shrink-0"
-                                  )}
-                                />
-                                {item.name}
-                              </>
-                            )}
-                          </NavLink>
+                          {item.collapsible ? (
+                            <Collapsible 
+                              label={item.name} 
+                              icon={<item.icon className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />}
+                            >
+                              <ul className="pl-8 space-y-2 mt-0.5">
+                                {item.children.map((child) => (
+                                  <li key={child.name}>
+                                    <NavLink
+                                      to={child.href}
+                                      className={({ isActive }) =>
+                                        cn(
+                                          isActive
+                                            ? "bg-indigo-50 text-indigo-600"
+                                            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                                          "rounded-md p-2 text-sm/6 font-semibold block w-full"
+                                        )
+                                      }
+                                    >
+                                      {child.name}
+                                    </NavLink>
+                                  </li>
+                                ))}
+                              </ul>
+                            </Collapsible>
+                          ) : (
+                            <NavLink
+                              to={item.href}
+                              end={item.href === "/dashboard"}
+                              className={({ isActive }) =>
+                                cn(
+                                  isActive
+                                    ? "bg-indigo-50 text-indigo-600"
+                                    : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                                  "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                                )
+                              }
+                            >
+                              {({ isActive }) => (
+                                <>
+                                  <item.icon
+                                    aria-hidden="true"
+                                    className={cn(
+                                      isActive
+                                        ? "text-indigo-600"
+                                        : "text-gray-400 group-hover:text-indigo-600",
+                                      "size-6 shrink-0"
+                                    )}
+                                  />
+                                  {item.name}
+                                </>
+                              )}
+                            </NavLink>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -173,33 +214,60 @@ const DashboardLayout = () => {
                 <ul role="list" className="-mx-2 space-y-1">
                   {navigationItems.map((item) => (
                     <li key={item.name}>
-                      <NavLink
-                        to={item.href}
-                        end={item.href === "/dashboard"}
-                        className={({ isActive }) =>
-                          cn(
-                            isActive
-                              ? "bg-indigo-50 text-indigo-600"
-                              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                          )
-                        }
-                      >
-                        {({ isActive }) => (
-                          <>
-                            <item.icon
-                              aria-hidden="true"
-                              className={cn(
-                                isActive
-                                  ? "text-indigo-600"
-                                  : "text-gray-400 group-hover:text-indigo-600",
-                                "size-6 shrink-0"
-                              )}
-                            />
-                            {item.name}
-                          </>
-                        )}
-                      </NavLink>
+                      {item.collapsible ? (
+                        <Collapsible 
+                          label={item.name} 
+                          icon={<item.icon className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />}
+                        >
+                          <ul className="pl-8 space-y-2 mt-0.5">
+                            {item.children.map((child) => (
+                              <li key={child.name}>
+                                <NavLink
+                                  to={child.href}
+                                  className={({ isActive }) =>
+                                    cn(
+                                      isActive
+                                        ? "bg-indigo-50 text-indigo-600"
+                                        : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                                      "rounded-md p-2 text-sm/6 font-semibold block w-full"
+                                    )
+                                  }
+                                >
+                                  {child.name}
+                                </NavLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </Collapsible>
+                      ) : (
+                        <NavLink
+                          to={item.href}
+                          end={item.href === "/dashboard"}
+                          className={({ isActive }) =>
+                            cn(
+                              isActive
+                                ? "bg-indigo-50 text-indigo-600"
+                                : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
+                              "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                            )
+                          }
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <item.icon
+                                aria-hidden="true"
+                                className={cn(
+                                  isActive
+                                    ? "text-indigo-600"
+                                    : "text-gray-400 group-hover:text-indigo-600",
+                                  "size-6 shrink-0"
+                                )}
+                              />
+                              {item.name}
+                            </>
+                          )}
+                        </NavLink>
+                      )}
                     </li>
                   ))}
                 </ul>

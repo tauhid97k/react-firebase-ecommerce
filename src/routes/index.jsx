@@ -77,6 +77,7 @@ export const router = createBrowserRouter([
   {
     path: "/admin",
     element: <AuthLayout />,
+    hydrateFallbackElement: <FullScreenLoader />,
     children: [
       {
         index: true,
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <DashboardLayout />,
+    hydrateFallbackElement: <FullScreenLoader />,
     children: [
       {
         index: true,
@@ -135,7 +137,6 @@ export const router = createBrowserRouter([
                 productData.price = productData.price.toString();
               }
               
-              console.log('Route action - update product data:', { id, productData });
               return updateProduct({ id, formData: productData });
             }
           },
@@ -185,7 +186,6 @@ export const router = createBrowserRouter([
                 categoryData.isVisible = false;
               }
               
-              console.log('Route action - update category data:', { id, categoryData });
               return updateCategory({ id, formData: categoryData });
             }
           },
