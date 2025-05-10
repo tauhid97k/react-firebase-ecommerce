@@ -38,7 +38,11 @@ export const ImageUploader = ({ images = [], onChange, maxImages = 5, storageFol
   };
 
   const handleFiles = async (files) => {
-    if (images.length + files.length > maxImages) {
+    // For single image mode (maxImages=1), replace existing image instead of showing error
+    if (maxImages === 1 && images.length > 0) {
+      // Remove existing image first (always at index 0 since there's only one)
+      await handleRemoveImage(0);
+    } else if (images.length + files.length > maxImages) {
       setError(`You can only upload a maximum of ${maxImages} images.`);
       return;
     }

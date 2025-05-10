@@ -1,6 +1,5 @@
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet, useNavigate, useRevalidator } from "react-router";
 import Collapsible from "@/components/shared/Collapsible";
-import { AiFillHome, AiOutlineInfoCircle, AiOutlineMail, AiOutlineCopyright } from "react-icons/ai";
 import TopLoader from "@/components/shared/top-loader";
 import { useState, useEffect } from "react";
 import {
@@ -22,14 +21,16 @@ import {
   ShoppingBagIcon,
   UserIcon,
   GlobeAltIcon,
+  CogIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { cn } from "@/lib/utils";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore/lite";
 import { ProfileModal } from "@/components/shared/profile-modal";
 
 const navigationItems = [
@@ -51,9 +52,12 @@ const navigationItems = [
     children: [
       { name: "Homepage", href: "/dashboard/website/home" },
       { name: "About Page", href: "/dashboard/website/about" },
-      { name: "Contact Page", href: "/dashboard/website/contact" },
-      { name: "Footer", href: "/dashboard/website/footer" },
     ],
+  },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: CogIcon,
   },
 ];
 
@@ -66,7 +70,9 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [settings, setSettings] = useState(null);
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
   
   // Monitor auth state changes
   useEffect(() => {
@@ -76,6 +82,24 @@ const DashboardLayout = () => {
     
     return () => unsubscribe();
   }, []);
+  
+  // Fetch settings on component mount and when revalidation occurs
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, "settings", "global");
+        const settingsSnapshot = await getDoc(settingsRef);
+        
+        if (settingsSnapshot.exists()) {
+          setSettings(settingsSnapshot.data());
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+    
+    fetchSettings();
+  }, [revalidator.state]); // Re-fetch when revalidator state changes
   
   const handleSignOut = async () => {
     try {
@@ -125,8 +149,8 @@ const DashboardLayout = () => {
             <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
               <div className="flex h-16 shrink-0 items-center">
                 <img
-                  alt="Brand logo"
-                  src="/logoall.png"
+                  alt={settings?.logo_img_alt || "Brand logo"}
+                  src={settings?.logo_img || "/logoall.png"}
                   className="h-10 w-auto"
                 />
               </div>
@@ -206,7 +230,11 @@ const DashboardLayout = () => {
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
-            <img alt="Brand logo" src="/logoall.png" className="h-10 w-auto" />
+            <img
+              alt={settings?.logo_img_alt || "Brand logo"}
+              src={settings?.logo_img || "/logoall.png"}
+              className="h-10 w-auto"
+            />
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">

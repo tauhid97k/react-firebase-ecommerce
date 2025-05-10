@@ -1,8 +1,37 @@
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore/lite";
+import { db } from "@/lib/firebase";
+import { useRevalidator } from "react-router";
+
 const Footer = () => {
+  const [settings, setSettings] = useState(null);
+  const revalidator = useRevalidator();
+
+  // Fetch settings on component mount and when revalidation occurs
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, "settings", "global");
+        const settingsSnapshot = await getDoc(settingsRef);
+        
+        if (settingsSnapshot.exists()) {
+          setSettings(settingsSnapshot.data());
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+    
+    fetchSettings();
+  }, [revalidator.state]); // Re-fetch when revalidator state changes
   return (
     <footer className="bg-white lg:grid lg:grid-cols-5 shadow-lg lg:gap-8 border-t border-green-600">
       <div className="flex flex-col items-center justify-center ">
-        <img src="/companylogo.png" alt="" className=" h-52 rounded-full" />
+        <img 
+          src={settings?.logo_img || "/companylogo.png"} 
+          alt={settings?.logo_img_alt || "Company Logo"} 
+          className="h-52 rounded-full" 
+        />
         <p className="text-green-800 font-extrabold text-4xl p-4">
           KhujeNin.xyz
         </p>

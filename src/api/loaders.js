@@ -1,5 +1,5 @@
 import { categoriesService, productsService } from "@/lib/firebase-services";
-import { collection, getDocs, query, orderBy } from "firebase/firestore/lite";
+import { collection, getDocs, query, orderBy, doc, getDoc } from "firebase/firestore/lite";
 import { db } from "@/lib/firebase";
 
 // Home page loaders
@@ -243,6 +243,30 @@ export const loadDashboardCategories = async () => {
     };
   } catch (error) {
     console.error("Error loading dashboard categories:", error);
+    throw error;
+  }
+};
+
+// Dashboard Settings Page Loader
+export const loadSettingsPage = async () => {
+  try {
+    // Check if settings document exists
+    const settingsRef = doc(db, "settings", "global");
+    const settingsSnapshot = await getDoc(settingsRef);
+    
+    if (settingsSnapshot.exists()) {
+      // Return settings data
+      return {
+        settings: settingsSnapshot.data()
+      };
+    } else {
+      // Return empty settings object if no settings exist yet
+      return {
+        settings: {}
+      };
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
     throw error;
   }
 };

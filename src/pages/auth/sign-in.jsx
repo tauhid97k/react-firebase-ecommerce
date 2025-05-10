@@ -1,14 +1,35 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { auth, googleProvider } from "@/lib/firebase";
+import { useState, useEffect } from "react";
+import { useNavigate, useRevalidator } from "react-router";
+import { auth, googleProvider, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore/lite";
 
 export default function AdminSignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState(null);
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
+  
+  // Fetch settings on component mount and when revalidation occurs
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, "settings", "global");
+        const settingsSnapshot = await getDoc(settingsRef);
+        
+        if (settingsSnapshot.exists()) {
+          setSettings(settingsSnapshot.data());
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+    
+    fetchSettings();
+  }, [revalidator.state]); // Re-fetch when revalidator state changes
   // Handle email/password sign in
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
@@ -46,8 +67,8 @@ export default function AdminSignInPage() {
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
-          alt="Brand logo"
-          src="/logoall.png"
+          alt={settings?.logo_img_alt || "Brand logo"}
+          src={settings?.logo_img || "/logoall.png"}
           className="mx-auto h-28 w-auto"
         />
         <h2 className="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">

@@ -1,4 +1,4 @@
-import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore/lite";
+import { collection, addDoc, doc, updateDoc, deleteDoc, setDoc } from "firebase/firestore/lite";
 import { db } from "@/lib/firebase";
 
 // Category mutations
@@ -131,5 +131,25 @@ export const deleteProduct = async ({ id }) => {
     return { id };
   } catch (error) {
     throw new Error(`Failed to delete product: ${error.message}`);
+  }
+};
+
+// Settings mutations
+export const updateSettings = async ({ formData }) => {
+  try {
+    // Create a settings object with logo and alt text
+    const settingsData = {
+      logo_img: formData.get('logo_img') || null,
+      logo_img_alt: formData.get('logo_img_alt') || 'Brand Logo',
+      updatedAt: Date.now()
+    };
+    
+    // Use setDoc with merge option to create or update the document
+    const settingsRef = doc(db, "settings", "global");
+    await setDoc(settingsRef, settingsData, { merge: true });
+    
+    return settingsData;
+  } catch (error) {
+    throw new Error(`Failed to update settings: ${error.message}`);
   }
 };

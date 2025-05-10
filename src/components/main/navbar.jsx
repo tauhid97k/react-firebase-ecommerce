@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useRevalidator } from "react-router";
+import { doc, getDoc } from "firebase/firestore/lite";
+import { db } from "@/lib/firebase";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -12,6 +14,26 @@ const navigation = [
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [settings, setSettings] = useState(null);
+  const revalidator = useRevalidator();
+  
+  // Fetch settings on component mount and when revalidation occurs
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, "settings", "global");
+        const settingsSnapshot = await getDoc(settingsRef);
+        
+        if (settingsSnapshot.exists()) {
+          setSettings(settingsSnapshot.data());
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+    
+    fetchSettings();
+  }, [revalidator.state]); // Re-fetch when revalidator state changes
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 bg-white border-b border-slate-200">
@@ -22,7 +44,11 @@ const Navbar = () => {
         <div className="flex lg:flex-1">
           <Link to="/" className="-m-1.5 p-1.5 flex items-center gap-3">
             <span className="sr-only">KhujeNin</span>
-            <img alt="Brand logo" src="/logoall.png" className="h-14 w-auto" />
+            <img 
+              alt={settings?.logo_img_alt || "Brand logo"} 
+              src={settings?.logo_img || "/logoall.png"} 
+              className="h-14 w-auto" 
+            />
             <p className="text-2xl font-bold text-green-800">KhujeNin</p>
           </Link>
         </div>
@@ -70,8 +96,8 @@ const Navbar = () => {
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <img
-                alt="Brand logo"
-                src="/logoall.png"
+                alt={settings?.logo_img_alt || "Brand logo"}
+                src={settings?.logo_img || "/logoall.png"}
                 className="h-10 w-auto"
               />
             </a>

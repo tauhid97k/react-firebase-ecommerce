@@ -6,7 +6,8 @@ import {
   loadProductDetails,
   loadDashboardOverview,
   loadDashboardProducts,
-  loadDashboardCategories
+  loadDashboardCategories,
+  loadSettingsPage
 } from "@/api/loaders";
 import {
   addCategory,
@@ -14,7 +15,8 @@ import {
   deleteCategory,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  updateSettings
 } from "@/api/mutations";
 
 // Layouts
@@ -35,6 +37,7 @@ const AdminSignInPage = lazy(() => import("@/pages/auth/sign-in"));
 const OverviewPage = lazy(() => import("@/pages/dashboard/overview"));
 const AdminProductsPage = lazy(() => import("@/pages/dashboard/products/index"));
 const AdminCategoriesPage = lazy(() => import("@/pages/dashboard/categories/index"));
+const AdminSettingsPage = lazy(() => import("@/pages/dashboard/settings/index"));
 
 
 
@@ -198,6 +201,15 @@ export const router = createBrowserRouter([
             }
           }
         ]
+      },
+      {
+        path: "settings",
+        element: <AdminSettingsPage />,
+        loader: loadSettingsPage,
+        action: async ({ request }) => {
+          const formData = await request.formData();
+          return updateSettings({ formData });
+        }
       },
     ],
   },
