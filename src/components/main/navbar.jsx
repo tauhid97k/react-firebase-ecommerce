@@ -123,6 +123,17 @@ const Navbar = () => {
                     {item.name}
                   </NavLink>
                 ))}
+                <div>
+                  <a
+                    href="https://wa.me/8801616367606?text=Hello%21%20I%20want%20to%20Promotion%20my%20products"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-green-800 text-lg font-semibold hover:text-green-600 border border-green-800 hover:border-green-600 transition-colors duration-200"
+                  >
+                    <img src="/whatsapp.png" alt="whatsapp" className="h-8" />
+                    Call for Ad
+                  </a>
+                </div>
               </div>
             </div>
           </div>

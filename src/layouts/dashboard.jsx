@@ -51,7 +51,7 @@ const navigationItems = [
     collapsible: true,
     children: [
       { name: "Homepage", href: "/dashboard/website/home" },
-      { name: "About Page", href: "/dashboard/website/about" },
+      // { name: "About Page", href: "/dashboard/website/about" },
     ],
   },
   {
