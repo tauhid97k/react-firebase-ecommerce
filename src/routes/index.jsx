@@ -25,6 +25,9 @@ import AuthLayout from "@/layouts/auth";
 import MainLayout from "@/layouts/main";
 import FullScreenLoader from "@/components/shared/full-screen-loader";
 
+// Auth utilities
+import { protectedLoader, authLoader } from "@/lib/auth-utils";
+
 // Lazy loaded components
 const HomePage = lazy(() => import("@/pages/home"));
 const CategoriesPage = lazy(() => import("@/pages/categories"));
@@ -80,6 +83,7 @@ export const router = createBrowserRouter([
   {
     path: "/admin",
     element: <AuthLayout />,
+    loader: authLoader, // Add auth loader to redirect if already logged in
     hydrateFallbackElement: <FullScreenLoader />,
     children: [
       {
@@ -91,6 +95,7 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <DashboardLayout />,
+    loader: protectedLoader, // Add protected loader to redirect if not logged in
     hydrateFallbackElement: <FullScreenLoader />,
     children: [
       {

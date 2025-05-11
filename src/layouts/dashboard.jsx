@@ -165,7 +165,7 @@ const DashboardLayout = () => {
                               label={item.name} 
                               icon={<item.icon className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />}
                             >
-                              <ul className="pl-8 space-y-2 mt-0.5">
+                              <ul className="pl-8 mt-0.5">
                                 {item.children.map((child) => (
                                   <li key={child.name}>
                                     <NavLink
@@ -247,7 +247,7 @@ const DashboardLayout = () => {
                           label={item.name} 
                           icon={<item.icon className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />}
                         >
-                          <ul className="pl-8 space-y-2 mt-0.5">
+                          <ul className="pl-8 mt-0.5">
                             {item.children.map((child) => (
                               <li key={child.name}>
                                 <NavLink
