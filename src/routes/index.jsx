@@ -7,7 +7,8 @@ import {
   loadDashboardOverview,
   loadDashboardProducts,
   loadDashboardCategories,
-  loadSettingsPage
+  loadSettingsPage,
+  loadWebsiteHomePage
 } from "@/api/loaders";
 import {
   addCategory,
@@ -16,7 +17,8 @@ import {
   addProduct,
   updateProduct,
   deleteProduct,
-  updateSettings
+  updateSettings,
+  updateHero
 } from "@/api/mutations";
 
 // Layouts
@@ -41,6 +43,7 @@ const OverviewPage = lazy(() => import("@/pages/dashboard/overview"));
 const AdminProductsPage = lazy(() => import("@/pages/dashboard/products/index"));
 const AdminCategoriesPage = lazy(() => import("@/pages/dashboard/categories/index"));
 const AdminSettingsPage = lazy(() => import("@/pages/dashboard/settings/index"));
+const WebsiteHomePage = lazy(() => import("@/pages/dashboard/website/home/index"));
 
 
 
@@ -215,6 +218,22 @@ export const router = createBrowserRouter([
           const formData = await request.formData();
           return updateSettings({ formData });
         }
+      },
+      {
+        path: "website",
+        children: [
+          {
+            path: "home",
+            element: <WebsiteHomePage />,
+            loader: loadWebsiteHomePage,
+            action: async ({ request }) => {
+              const formData = await request.formData();
+              const result = await updateHero({ formData });
+              // Return the result directly, which already includes success: true from the mutation
+              return result;
+            }
+          }
+        ]
       },
     ],
   },

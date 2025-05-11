@@ -5,6 +5,15 @@ import { db } from "@/lib/firebase";
 // Home page loaders
 export const loadHomePageData = async () => {
   try {
+    // Load hero section data
+    const heroRef = doc(db, "home", "hero");
+    const heroSnapshot = await getDoc(heroRef);
+    let heroData = {};
+    
+    if (heroSnapshot.exists()) {
+      heroData = heroSnapshot.data();
+    }
+    
     // Load categories for the home page (limited to 5)
     // Only show categories that are marked as visible
     const allCategories = await categoriesService.getAll();
@@ -51,6 +60,7 @@ export const loadHomePageData = async () => {
     }
 
     return {
+      hero: heroData,
       categories: homeCategories,
       categorizedProducts
     };
@@ -267,6 +277,32 @@ export const loadSettingsPage = async () => {
     }
   } catch (error) {
     console.error("Error loading settings:", error);
+    throw error;
+  }
+};
+
+// Dashboard Website Home Page Loader
+export const loadWebsiteHomePage = async () => {
+  try {
+    // Check if home document exists
+    const homeRef = doc(db, "home", "hero");
+    const homeSnapshot = await getDoc(homeRef);
+    
+    console.log("Home page data from Firestore:", homeSnapshot.exists() ? homeSnapshot.data() : "No data");
+    
+    if (homeSnapshot.exists()) {
+      // Return home data
+      return {
+        hero: homeSnapshot.data()
+      };
+    } else {
+      // Return empty hero object if no data exists yet
+      return {
+        hero: {}
+      };
+    }
+  } catch (error) {
+    console.error("Error loading home page data:", error);
     throw error;
   }
 };

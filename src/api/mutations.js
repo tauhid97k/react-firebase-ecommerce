@@ -153,3 +153,76 @@ export const updateSettings = async ({ formData }) => {
     throw new Error(`Failed to update settings: ${error.message}`);
   }
 };
+
+// Hero section mutations
+export const updateHero = async ({ formData }) => {
+  try {
+    // Create a hero object with title and description
+    const heroData = {
+      hero_title: formData.get('hero_title') || 'Welcome to our store',
+      hero_description: formData.get('hero_description') || 'Find the best products for your needs',
+      updatedAt: Date.now()
+    };
+    
+    // Add hero background image if available
+    const heroBg = formData.get('hero_bg');
+    if (heroBg) {
+      // Check if the image URL is too large (Firestore document size limit is ~1MB)
+      const MAX_SIZE = 900000; // ~900KB to be safe
+      
+      if (heroBg.length > MAX_SIZE) {
+        console.error(`Image size (${Math.round(heroBg.length / 1024)} KB) exceeds the maximum allowed size (900 KB)`);
+        return {
+          success: false,
+          error: `Image size (${Math.round(heroBg.length / 1024)} KB) exceeds the maximum allowed size (900 KB). Please use a smaller image or compress the current one.`,
+          errorType: 'SIZE_EXCEEDED'
+        };
+      }
+      
+      heroData.hero_bg = heroBg;
+    }
+    
+    console.log('Saving hero data:', heroData); // Debug log
+    
+    try {
+      // Use setDoc with merge: true to update only the specified fields
+      const heroRef = doc(db, "home", "hero");
+      await setDoc(heroRef, heroData, { merge: true });
+      
+      // Add a small delay to ensure Firestore has time to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('Hero data saved successfully');
+      
+      // No need for manual revalidation here
+      // React Router will automatically revalidate the routes that use this data
+      // when the action completes successfully
+      
+      return {
+        ...heroData,
+        success: true,
+        timestamp: Date.now() // Add timestamp to force revalidation
+      };
+    } catch (firestoreError) {
+      console.error('Firebase error:', firestoreError);
+      
+      // Check if it's a document size error
+      if (firestoreError.message && firestoreError.message.includes('maximum allowed size')) {
+        return {
+          success: false,
+          error: 'The image is too large for Firebase storage. Please use a smaller image (under 900KB).',
+          errorType: 'SIZE_EXCEEDED'
+        };
+      }
+      
+      throw firestoreError; // Re-throw to be caught by the outer catch
+    }
+  } catch (error) {
+    console.error('Error updating hero section:', error);
+    return {
+      success: false,
+      error: `Failed to update hero section: ${error.message}`,
+      errorType: 'SERVER_ERROR'
+    };
+  }
+};
